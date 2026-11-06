@@ -4,17 +4,12 @@
     <summary>Pessoa</summary>
     <a routerLink="/people/new" routerLinkActive="active" ariaCurrentWhenActive="page">Cadastrar Pessoa</a>
     <a routerLink="/people" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-      ariaCurrentWhenActive="page">Pesquisar Pessoa</a>
+      ariaCurrentWhenActive="page">Gerenciar pessoas</a>
   </details>
   <details open>
     <summary>Veículos</summary>
     <a routerLink="/vehicles/new" routerLinkActive="active" ariaCurrentWhenActive="page">Cadastrar Veículo</a>
-    <details class="submenu" open>
-      <summary>Pesquisar</summary>
-      <a routerLink="/vehicles/by-owner" routerLinkActive="active"
-        ariaCurrentWhenActive="page">Por Proprietário</a>
-      <a routerLink="/vehicles" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        ariaCurrentWhenActive="page">Por dados do veículo</a>
-    </details>
+    <a routerLink="/vehicles" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+      ariaCurrentWhenActive="page">Gerenciar veículos</a>
   </details>
 </nav>

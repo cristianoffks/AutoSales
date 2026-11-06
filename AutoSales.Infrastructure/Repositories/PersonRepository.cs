@@ -47,7 +47,11 @@ public sealed class PersonRepository(RegistryDbContext db) : IPersonRepository
 
     public async Task DeleteAsync(Person entity, CancellationToken cancellationToken)
     {
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        await db.Vehicles.Where(vehicle => vehicle.PersonId == entity.Id)
+            .ExecuteDeleteAsync(cancellationToken);
         db.People.Remove(entity);
         await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 }

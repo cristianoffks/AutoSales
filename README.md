@@ -23,7 +23,7 @@ dotnet ef database update --project AutoSales.Infrastructure --startup-project A
 
 O SQL Server usa a porta local `14333` e guarda os dados em um volume do Docker. Mantenha o mesmo `.env` enquanto usar esse volume. A API lê a conexão dos segredos de usuário em desenvolvimento.
 
-O comando aplica as migrações pendentes. A migração `SimplifyVehicleBrandAndModel` copia a marca e o modelo para os campos de `Vehicles` e remove as tabelas separadas, mantendo os valores dos veículos existentes.
+O comando aplica a migração única `20261106130000_InitialCreate`, que cria diretamente as tabelas `People` e `Vehicles`, com marca e modelo no veículo. Esta versão consolidada é destinada a um banco novo; bancos com o histórico antigo não devem receber a migração inicial novamente.
 
 Abra `AutoSales.sln`, selecione `AutoSales.Api` como projeto de inicialização e execute com F5. Para iniciar pelo terminal, rode `dotnet run --project AutoSales.Api`. A interface fica em [http://localhost:5080/swagger](http://localhost:5080/swagger).
 
@@ -31,11 +31,13 @@ Abra `AutoSales.sln`, selecione `AutoSales.Api` como projeto de inicialização 
 
 Como alternativa ao `dotnet ef database update`, abra `database/CreateSchema.sql` no SQL Server Management Studio, conecte-se ao SQL Server e execute o arquivo completo. No Docker local, o servidor é `127.0.0.1,14333`, com usuário `sa` e a senha configurada no `.env`.
 
-O script cria o banco `AutoSales` e aplica as migrações, deixando as tabelas de pessoas (`People`) e veículos (`Vehicles`), com índices e chave estrangeira do proprietário. Marca e modelo são campos de texto do veículo. O histórico fica registrado em `__EFMigrationsHistory`. O script também atualiza um banco que já possui a migração `InitialCreate`, copiando marca e modelo antes de remover as tabelas antigas. Pode ser executado novamente sem reaplicar as migrações registradas.
+O script cria o banco `AutoSales` diretamente na estrutura atual, com as tabelas de pessoas (`People`) e veículos (`Vehicles`), índices e chave estrangeira do proprietário. Marca e modelo são campos de texto do veículo. O histórico equivalente das migrações fica registrado em `__EFMigrationsHistory`. Pode ser executado novamente na estrutura atual sem apagar os registros.
+
+O único script SQL é `database/CreateSchema.sql`. Ele não atualiza bancos com a estrutura ou o histórico antigo e interrompe a execução nesses casos, sem apagar os dados.
 
 Escolha o script SQL ou a migração para criar o banco. A conexão da API continua sendo configurada conforme a seção de execução local.
 
-Cada veículo exige uma pessoa existente por meio de `Vehicles.PersonId`, que é obrigatório e referencia `People.Id`. Uma pessoa pode ter vários veículos, e não pode ser excluída enquanto tiver veículos vinculados.
+Cada veículo exige uma pessoa existente por meio de `Vehicles.PersonId`, que é obrigatório e referencia `People.Id`. Uma pessoa pode ter vários veículos. Ao excluir uma pessoa pela API, seus veículos são excluídos na mesma transação; se qualquer etapa falhar, toda a operação é desfeita. A interface pede confirmação e avisa sobre a exclusão dos veículos antes de enviar a requisição.
 
 ## Interface Angular
 
@@ -59,7 +61,7 @@ Esse comando remove as dependências baixadas, o cache e os arquivos de compila�
 
 ## API
 
-`/api/people` e `/api/vehicles` aceitam GET para listar e POST para criar. Acrescente `/{id}` para consultar (GET), atualizar (PUT) ou excluir (DELETE). O campo `personId` vincula o veículo a uma pessoa existente na criação. A atualização permite alterar apenas os dados do veículo, mantendo o proprietário. O banco impede excluir pessoas que ainda têm veículos vinculados.
+`/api/people` e `/api/vehicles` aceitam GET para listar e POST para criar. Acrescente `/{id}` para consultar (GET), atualizar (PUT) ou excluir (DELETE). O campo `personId` vincula o veículo a uma pessoa existente na criação. A atualização permite alterar apenas os dados do veículo, mantendo o proprietário. A exclusão de pessoa pela API remove seus veículos antes de remover a pessoa, na mesma transação.
 
 Nas listagens, use `GET /api/people?name=Ana` ou `GET /api/people?cpf=123.456.789-09` para buscar pessoas. Para veículos, use `GET /api/vehicles?search=Honda%20Civ` ou `GET /api/vehicles?plate=ABC-1D23`. Nome, marca e modelo aceitam trechos. O filtro `search` pesquisa a marca e o modelo juntos. CPF e placa usam correspondência exata e aceitam valores com ou sem máscara. Quando ambos os filtros da mesma listagem são informados, o resultado precisa atender aos dois.
 

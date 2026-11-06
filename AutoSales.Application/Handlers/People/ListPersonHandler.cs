@@ -28,14 +28,9 @@ public sealed class ListPersonHandler : IRequestHandler<ListPersonQuery, Result<
             var name = message.Name;
             var cpf = message.Cpf;
 
-            if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(cpf))
-            {
-                _logger.LogWarning("Pesquisa de pessoas sem nome ou CPF.");
-                return Result<IReadOnlyList<Person>>.Failure("Informe pelo menos um atributo: Nome ou CPF.");
-            }
-
             var normalizedCpf = string.IsNullOrWhiteSpace(cpf) ? null : cpf.NormalizeCpf();
-            var people = await _repository.ListAsync(name?.Trim(), normalizedCpf, cancellationToken);
+            var normalizedName = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+            var people = await _repository.ListAsync(normalizedName, normalizedCpf, cancellationToken);
             return Result<IReadOnlyList<Person>>.Success(people);
         }
         catch (Exception exception)

@@ -1,14 +1,11 @@
 <main>
   <h1>{{ title }}</h1>
   <app-error-dialog [message]="error" (closed)="error = ''" />
+  <app-error-dialog title="Sucesso" [message]="saved ? successMessage : ''" (closed)="saved = false" />
 
   @if (loadingVehicle) {
     <p role="status">Carregando veículo…</p>
   } @else if (!loadError) {
-
-    @if (saved) {
-      <p role="status">{{ successMessage }}</p>
-    }
 
     <section aria-labelledby="vehicle-title">
       <h2 id="vehicle-title">Dados do veículo</h2>

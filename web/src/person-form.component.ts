@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ErrorDialogComponent } from './error-dialog.component';
@@ -22,6 +22,7 @@ export class PersonFormComponent implements OnInit {
   form: PersonInput | null = null;
   saving = false;
   error = '';
+  success = '';
   loadFailed = false;
   invalidFields: string[] = [];
 
@@ -40,12 +41,31 @@ export class PersonFormComponent implements OnInit {
     }
 
     this.service.get(this.editingId).subscribe({
-      next: ({ id, ...fields }) => (this.form = fields),
+      next: ({ id, ...fields }) => (this.form = { ...fields, cpf: this.formatCpf(fields.cpf) }),
       error: response => {
         this.loadFailed = true;
         this.error = readApiError(response).message;
       },
     });
+  }
+
+  formatCpf(value: string): string {
+    return value.replace(/\D/g, '').slice(0, 11)
+      .replace(/^(\d{3})(\d)/, '$1.$2')
+      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d)/, '.$1-$2');
+  }
+
+  updateCpf(value: string, field: NgModel): void {
+    if (!this.form) {
+      return;
+    }
+
+    this.form.cpf = this.formatCpf(value);
+    if (value !== this.form.cpf) {
+      field.control.setValue(this.form.cpf, { emitViewToModelChange: false });
+    }
+    this.clearFieldError('cpf');
   }
 
   formatPhone(value: string): string {
@@ -82,7 +102,7 @@ export class PersonFormComponent implements OnInit {
     this.clearFieldError('phone');
   }
 
-  save(birthDateIsValid: boolean): void {
+  save(birthDateIsValid: boolean, personForm: NgForm): void {
     const person = this.form;
     if (!person || this.saving) {
       return;
@@ -96,13 +116,24 @@ export class PersonFormComponent implements OnInit {
 
     this.saving = true;
     this.error = '';
+    this.success = '';
     this.invalidFields = [];
+    const payload = { ...person, cpf: person.cpf.replace(/[.-]/g, '') };
     const request: Observable<Person | void> = this.editingId === null
-      ? this.service.create(person)
-      : this.service.update(this.editingId, person);
+      ? this.service.create(payload)
+      : this.service.update(this.editingId, payload);
 
     request.subscribe({
-      next: () => this.back(),
+      next: () => {
+        this.saving = false;
+        if (this.editingId === null) {
+          this.form = { fullName: '', cpf: '', birthDate: '', email: '', phone: '' };
+          personForm.resetForm({ ...this.form, personCpf: '' });
+        }
+        this.success = this.editingId === null
+          ? 'Pessoa cadastrada com sucesso.'
+          : 'Alterações salvas com sucesso.';
+      },
       error: response => {
         this.saving = false;
         const error = readApiError(response);

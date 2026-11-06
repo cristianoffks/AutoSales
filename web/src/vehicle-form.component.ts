@@ -47,7 +47,7 @@ export class VehicleFormComponent implements OnInit {
     this.editingId = Number(id);
     if (!Number.isInteger(this.editingId) || this.editingId < 1) {
       this.loadError = true;
-      this.showError('Código de veículo inválido.');
+      this.error = 'Código de veículo inválido.';
       return;
     }
 
@@ -67,10 +67,10 @@ export class VehicleFormComponent implements OnInit {
       },
       error: response => {
         if (afterSave) {
-          this.showError('Alterações salvas, mas não foi possível recarregar o veículo.');
+          this.error = 'Alterações salvas, mas não foi possível recarregar o veículo.';
         } else {
           this.loadError = true;
-          this.showError(readApiError(response).message);
+          this.error = readApiError(response).message;
         }
         this.loadingVehicle = false;
       },
@@ -146,12 +146,12 @@ export class VehicleFormComponent implements OnInit {
     this.saved = false;
 
     if (this.personId === null) {
-      this.showError('Busque um proprietário pelo CPF antes de salvar.');
+      this.error = 'Busque um proprietário pelo CPF antes de salvar.';
       return;
     }
 
     if (!formIsValid || !this.vehicleFieldsComplete || !this.validManufactureYear) {
-      this.showError(`Confira placa, marca, modelo e ano de fabricação (1000 a ${this.currentYear}).`);
+      this.error = `Confira placa, marca, modelo e ano de fabricação (1000 a ${this.currentYear}).`;
       return;
     }
 
@@ -190,17 +190,16 @@ export class VehicleFormComponent implements OnInit {
         }
 
         this.invalidFields = error.fields.filter(field => editableFields.includes(field));
-        this.showError(error.message);
+        this.error = error.message;
         this.saving = false;
       },
     });
   }
 
   private saveRequest(vehicle: VehicleInput): Observable<Vehicle | void> {
-    if (this.editingId === null) {
-      return this.vehicleService.create(vehicle);
-    }
-    return this.vehicleService.update(this.editingId, vehicle);
+    return this.editingId === null
+      ? this.vehicleService.create(vehicle)
+      : this.vehicleService.update(this.editingId, vehicle);
   }
 
   get title(): string {
@@ -212,10 +211,7 @@ export class VehicleFormComponent implements OnInit {
   }
 
   get saveLabel(): string {
-    if (this.saving) {
-      return 'Salvando…';
-    }
-    return 'Salvar';
+    return this.saving ? 'Salvando…' : 'Salvar';
   }
 
   isInvalid(field: string, invalid = false): boolean {
@@ -264,12 +260,9 @@ export class VehicleFormComponent implements OnInit {
     this.invalidFields = this.invalidFields.filter(value => value !== field);
   }
 
-  private showError(message: string): void {
-    this.error = message;
-  }
-
   private showOwnerError(message: string): void {
     this.ownerMessage = message;
-    this.showError(message);
+    this.error = message;
   }
 }
+

@@ -1,13 +1,12 @@
-import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PeopleService } from './people.service';
-import { Vehicle } from './vehicle';
+import { RouterLink } from '@angular/router';
+import { finalize, map, switchMap } from 'rxjs';
+import { PeopleService, Person } from './people.service';
 import { VehicleService } from './vehicle.service';
+import { Vehicle } from './vehicle';
 import { readApiError } from './api-error';
-
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-vehicles',
@@ -15,111 +14,51 @@ import { readApiError } from './api-error';
   templateUrl: './vehicles.component.html',
 })
 export class VehiclesComponent implements OnInit {
-  private readonly vehicleService = inject(VehicleService);
   private readonly peopleService = inject(PeopleService);
-  private readonly location = inject(Location);
-  readonly byOwner = inject(ActivatedRoute).snapshot.data['byOwner'] === true;
-
-  term = '';
-  plate = '';
-  cpf = '';
-  ownerName = '';
-  vehicles: Vehicle[] = [];
-  loading = false;
-  error = '';
-
-  searched = false;
-
-  ngOnInit(): void {
-    const { ownerCpf } = this.location.getState() as { ownerCpf?: string };
-    if (this.byOwner && ownerCpf) {
-      this.cpf = ownerCpf;
-      this.search();
-    }
-  }
-
-  get hasFilters(): boolean {
-    return this.byOwner ? !!this.cpf.trim() : !!(this.term.trim() || this.plate.trim());
-  }
-
+  private readonly vehicleService = inject(VehicleService);
+  name = ''; cpf = ''; plate = ''; brand = ''; model = ''; year = ''; id = ''; personId = '';
+  rows: { vehicle: Vehicle; owner: Person }[] = [];
+  loading = false; deleting = false; error = '';
+  ngOnInit(): void { this.search(); }
   search(): void {
-    if (this.loading || !this.hasFilters) {
-      return;
-    }
-
-    this.searched = true;
-    this.error = '';
-    this.ownerName = '';
+    if (this.loading || this.deleting) return;
     this.loading = true;
-
-    if (this.byOwner) {
-      this.searchByOwner();
-      return;
-    }
-
-    let params = new HttpParams();
-    if (this.term.trim()) {
-      params = params.set('search', this.term.trim());
-    }
-    if (this.plate.trim()) {
-      params = params.set('plate', this.plate.trim());
-    }
-
-    this.loadVehicles(params);
-  }
-
-  private searchByOwner(): void {
-    const cpf = this.cpf.trim();
-    if (!/^(?:[0-9]{11}|[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2})$/.test(cpf)) {
-      this.error = 'Informe um CPF com 11 dígitos, com ou sem máscara.';
-      this.loading = false;
-      return;
-    }
-
-    this.peopleService.list('', cpf).subscribe({
-      next: ([person]) => {
-        if (!person) {
-          this.error = 'Nenhuma pessoa encontrada com esse CPF.';
-          this.loading = false;
-          return;
-        }
-
-        this.ownerName = person.fullName;
-        this.loadVehicles(new HttpParams().set('personId', person.id), person.id);
-      },
-      error: response => {
-        this.error = readApiError(response).message;
-        this.loading = false;
-      },
-    });
-  }
-
-  private loadVehicles(params: HttpParams, personId?: number): void {
-    this.vehicleService.list(params).subscribe({
-      next: vehicles => {
-        (this.vehicles = personId === undefined
-          ? vehicles
-          : vehicles.filter(vehicle => vehicle.personId === personId));
-        this.loading = false;
-      },
-      error: response => {
-        this.error = readApiError(response).message;
-        this.loading = false;
-      },
-    });
-  }
-
-  clear(): void {
-    this.term = '';
-    this.plate = '';
-    this.cpf = '';
-    this.resetResults();
-  }
-
-  resetResults(): void {
-    this.ownerName = '';
-    this.vehicles = [];
     this.error = '';
-    this.searched = false;
+    const brand = this.brand.trim().toLocaleLowerCase();
+    const model = this.model.trim().toLocaleLowerCase();
+    const year = this.year.trim();
+    const id = this.id.trim();
+    const personId = this.personId.trim();
+    let params = new HttpParams();
+    if (this.plate.trim()) params = params.set('plate', this.plate.trim());
+    if (brand || model) params = params.set('search', this.brand.trim() || this.model.trim());
+    this.peopleService.list(this.name, this.cpf).pipe(
+      switchMap(people => {
+        const owners = people.filter(owner => !personId || owner.id === Number(personId));
+        return this.vehicleService.listByOwners(owners, params);
+      }),
+      map(groups => groups.flatMap(({ person, vehicles }) => vehicles
+        .filter(vehicle => vehicle.brand.toLocaleLowerCase().includes(brand) &&
+          vehicle.model.toLocaleLowerCase().includes(model) &&
+          (!year || vehicle.manufactureYear === Number(year)) && (!id || vehicle.id === Number(id)))
+        .map(vehicle => ({ vehicle, owner: person })))),
+      finalize(() => this.loading = false),
+    ).subscribe({
+      next: rows => this.rows = rows,
+      error: response => this.error = readApiError(response).message,
+    });
+  }
+  clear(): void {
+    this.name = this.cpf = this.plate = this.brand = this.model = this.year = this.id = this.personId = '';
+    this.search();
+  }
+  deleteVehicle(vehicle: Vehicle): void {
+    if (this.deleting || !window.confirm(`Excluir o veículo ${vehicle.plate}?`)) return;
+    this.deleting = true;
+    this.error = '';
+    this.vehicleService.delete(vehicle.id).subscribe({
+      next: () => { this.rows = this.rows.filter(row => row.vehicle.id !== vehicle.id); this.deleting = false; },
+      error: response => { this.error = readApiError(response).message; this.deleting = false; },
+    });
   }
 }

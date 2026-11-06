@@ -35,6 +35,10 @@ export class PeopleService {
     return this.http.get<Person>(`/api/people/${id}`);
   }
 
+  delete(id: number) {
+    return this.http.delete<void>(`/api/people/${id}`);
+  }
+
   create(person: PersonInput) {
     return this.http.post<Person>('/api/people', person);
   }

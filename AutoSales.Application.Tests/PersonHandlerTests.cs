@@ -183,16 +183,17 @@ public class PersonHandlerTests
     }
 
     [Fact]
-    public async Task ListAsync_NoFilters_ReturnsFailureWithoutQueryingRepository()
+    public async Task ListAsync_NoFilters_ReturnsAllPeople()
     {
+        var people = new[] { new Person { Id = 1, FullName = "Ana", Cpf = "12345678909", Email = "ana@example.com", Phone = "11999999999" } };
+        repository.Setup(repo => repo.ListAsync(null, null, CancellationToken.None)).ReturnsAsync(people);
         var handler = new ListPersonHandler(repository.Object, NullLogger<ListPersonHandler>.Instance);
 
         var result = await handler.Handle(new ListPersonQuery(" ", null), CancellationToken.None);
 
-        Assert.False(result.IsSuccess);
-        Assert.Equal("Informe pelo menos um atributo: Nome ou CPF.", result.Message);
-        repository.Verify(repo => repo.ListAsync(It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<CancellationToken>()), Times.Never);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(people, result.Value);
+        repository.Verify(repo => repo.ListAsync(null, null, CancellationToken.None), Times.Once);
     }
 
     [Fact]

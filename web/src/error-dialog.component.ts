@@ -16,6 +16,7 @@ import {
   templateUrl: './error-dialog.component.html',
 })
 export class ErrorDialogComponent implements OnChanges, AfterViewInit {
+  @Input() title = 'Atenção';
   @Input() message = '';
   @Output() closed = new EventEmitter<void>();
   @ViewChild('dialog') private dialog?: ElementRef<HTMLDialogElement>;

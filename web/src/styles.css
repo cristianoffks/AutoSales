@@ -139,3 +139,48 @@ th, td {
   padding: 12px;
   border-bottom: 1px solid #dce2e9;
 }
+
+.owner-list {
+  list-style: none;
+  padding: 0;
+}
+.owner-item {
+  background: white;
+  border: 1px solid #dce2e9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+}
+.owner-details > summary {
+  cursor: pointer;
+}
+.owner-heading {
+  display: inline-flex;
+  width: calc(100% - 24px);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  vertical-align: middle;
+}
+.owner-item button {
+  padding: 4px 8px;
+}
+.result-row, .result-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.result-row {
+  justify-content: space-between;
+}
+.vehicle-list {
+  list-style: none;
+  margin-top: 12px;
+  padding-left: 24px;
+  border-left: 2px solid #dce2e9;
+}
+.vehicle-list li {
+  padding: 8px 0;
+}
