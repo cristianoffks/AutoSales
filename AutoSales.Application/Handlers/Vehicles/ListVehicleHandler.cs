@@ -28,16 +28,9 @@ public sealed class ListVehicleHandler : IRequestHandler<ListVehicleQuery, Resul
             var search = message.Search;
             var plate = message.Plate;
             var personId = message.PersonId;
-            if (string.IsNullOrWhiteSpace(search) && string.IsNullOrWhiteSpace(plate) && !personId.HasValue)
-            {
-                _logger.LogWarning("Pesquisa de veículos sem filtros.");
-                return Result<IReadOnlyList<VehicleResponse>>.Failure(
-                    "Informe pelo menos um filtro: marca/modelo, placa ou proprietário.", errorType: ErrorType.Validation);
-            }
-
-
+            var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
             var normalizedPlate = string.IsNullOrWhiteSpace(plate) ? null : plate.Trim().NormalizePlate();
-            var vehicles = await _repository.ListAsync(search?.Trim(), normalizedPlate, personId, cancellationToken);
+            var vehicles = await _repository.ListAsync(normalizedSearch, normalizedPlate, personId, cancellationToken);
             var result = vehicles.Select(vehicle => new VehicleResponse(
                 vehicle.Id, vehicle.Plate, vehicle.ManufactureYear,
                 vehicle.Brand, vehicle.Model, vehicle.PersonId)).ToList();

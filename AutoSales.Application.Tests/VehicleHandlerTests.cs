@@ -25,17 +25,31 @@ public class VehicleHandlerTests
 
     private static VehicleRequest CreateRequest() => new("abc-1234", 2020, " Honda ", " Civic ", 1);
 
-    [Fact]
-    public async Task ListAsync_NoFilters_ReturnsValidationWithoutQueryingRepository()
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("", "")]
+    [InlineData(" ", " ")]
+    public async Task ListAsync_NoFilters_ReturnsAllVehicles(string? search, string? plate)
     {
+        var vehicle = new Vehicle
+        {
+            Id = 10, Plate = "ABC1234", PersonId = 1, Brand = "Honda", Model = "Civic", ManufactureYear = 2020
+        };
+        repository.Setup(repo => repo.ListAsync(null, null, null, CancellationToken.None))
+            .ReturnsAsync(new[] { vehicle });
         var handler = new ListVehicleHandler(repository.Object, NullLogger<ListVehicleHandler>.Instance);
 
-        var result = await handler.Handle(new ListVehicleQuery(" ", null, null), CancellationToken.None);
+        var result = await handler.Handle(new ListVehicleQuery(search, plate, null), CancellationToken.None);
 
-        Assert.False(result.IsSuccess);
-        Assert.Equal(AutoSales.Application.Results.ErrorType.Validation, result.ErrorType);
-        repository.Verify(repo => repo.ListAsync(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int?>(),
-            It.IsAny<CancellationToken>()), Times.Never);
+        Assert.True(result.IsSuccess);
+        var item = Assert.Single(result.Value!);
+        Assert.Equal(vehicle.Id, item.Id);
+        Assert.Equal(vehicle.Plate, item.Plate);
+        Assert.Equal(vehicle.Brand, item.Brand);
+        Assert.Equal(vehicle.Model, item.Model);
+        Assert.Equal(vehicle.ManufactureYear, item.ManufactureYear);
+        Assert.Equal(vehicle.PersonId, item.PersonId);
+        repository.Verify(repo => repo.ListAsync(null, null, null, CancellationToken.None), Times.Once);
     }
 
     [Theory]

@@ -67,6 +67,8 @@ Nas listagens, use `GET /api/people?name=Ana` ou `GET /api/people?cpf=123.456.78
 
 Marca e modelo são informados manualmente e gravados diretamente no veículo, sem cadastros ou tabelas separados.
 
+Sem filtros, `GET /api/people` e `GET /api/vehicles` retornam todos os registros. Quando não há registros, retornam uma lista vazia com HTTP 200.
+
 ## Arquitetura
 
 - `AutoSales.Api` contém os controladores e o componente de tratamento de erros (`middleware`). Os controladores recebem `ISender` por injeção de dependência e enviam as operações pelo MediatR com `Send`.
