@@ -10,16 +10,16 @@ using FluentValidation;
 
 namespace AutoSales.Application.Handlers.Vehicles;
 
-public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleCommand, Result<VehicleResponse>>
+public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleRequest, Result<VehicleResponse>>
 {
     private readonly IVehicleRepository _repository;
-    private readonly IValidator<VehicleRequest> _validator;
+    private readonly IValidator<CreateVehicleRequest> _validator;
     private readonly IPersonRepository _people;
     private readonly ILogger<CreateVehicleHandler> _logger;
 
     public CreateVehicleHandler(
         IVehicleRepository repository,
-        IValidator<VehicleRequest> validator,
+        IValidator<CreateVehicleRequest> validator,
         IPersonRepository people,
         ILogger<CreateVehicleHandler> logger)
     {
@@ -29,11 +29,10 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleCommand,
         _logger = logger;
     }
 
-    public async Task<Result<VehicleResponse>> Handle(CreateVehicleCommand message, CancellationToken cancellationToken)
+    public async Task<Result<VehicleResponse>> Handle(CreateVehicleRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var request = message.Data;
             await _validator.ValidateAndThrowAsync(request, cancellationToken);
             var owner = await _people.FindAsync(request.PersonId, cancellationToken);
             if (owner == null)

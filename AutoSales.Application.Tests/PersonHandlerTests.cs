@@ -13,8 +13,11 @@ public class PersonHandlerTests
 {
     private readonly Mock<IPersonRepository> repository = new();
 
-    private static PersonRequest CreateRequest() => new(
+    private static CreatePersonRequest CreateRequest() => new(
         " Ana Silva ", "12345678909", new DateOnly(1990, 1, 15), "ana@example.com", "11999999999");
+
+    private static UpdatePersonRequest CreateUpdateRequest(int id) => new(
+        " Ana Silva ", "12345678909", new DateOnly(1990, 1, 15), "ana@example.com", "11999999999") { Id = id };
 
     private static Person CreatePerson(string cpf = "12345678909") => new()
     {
@@ -29,7 +32,7 @@ public class PersonHandlerTests
     [Fact]
     public async Task CreateAsync_NormalizesCpfAndName()
     {
-        var result = await new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance).Handle(new CreatePersonCommand(CreateRequest()), CancellationToken.None);
+        var result = await new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance).Handle(CreateRequest(), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         var person = Assert.IsType<Person>(result.Value);
@@ -45,7 +48,7 @@ public class PersonHandlerTests
 
         var exception = await Assert.ThrowsAsync<ValidationException>(() =>
             new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance)
-                .Handle(new CreatePersonCommand(request), CancellationToken.None));
+                .Handle(request, CancellationToken.None));
 
         Assert.Contains(exception.Errors, error => error.PropertyName == "Cpf");
         repository.Verify(repo => repo.AddAsync(It.IsAny<Person>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -59,7 +62,7 @@ public class PersonHandlerTests
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance)
-                .Handle(new CreatePersonCommand(CreateRequest()), CancellationToken.None));
+                .Handle(CreateRequest(), CancellationToken.None));
 
         Assert.Same(failure, exception);
     }
@@ -72,7 +75,7 @@ public class PersonHandlerTests
 
         await Assert.ThrowsAsync<OperationCanceledException>(() =>
             new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance)
-                .Handle(new CreatePersonCommand(CreateRequest()), CancellationToken.None));
+                .Handle(CreateRequest(), CancellationToken.None));
 
     }
 
@@ -82,7 +85,7 @@ public class PersonHandlerTests
         var request = CreateRequest() with { Email = "invalid" };
 
         var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-            new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance).Handle(new CreatePersonCommand(request), CancellationToken.None));
+            new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance).Handle(request, CancellationToken.None));
 
         Assert.Contains(exception.Errors, error => error.PropertyName == "Email");
         repository.Verify(repo => repo.AddAsync(It.IsAny<Person>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -94,7 +97,7 @@ public class PersonHandlerTests
         repository.Setup(repo => repo.ExistsByCpfAsync("12345678909", CancellationToken.None)).ReturnsAsync(true);
 
         var result = await new CreatePersonHandler(repository.Object, new PersonValidator(), NullLogger<CreatePersonHandler>.Instance)
-            .Handle(new CreatePersonCommand(CreateRequest()), CancellationToken.None);
+            .Handle(CreateRequest(), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Cpf", result.Field);
@@ -107,7 +110,7 @@ public class PersonHandlerTests
         var logger = new Mock<Microsoft.Extensions.Logging.ILogger<DeletePersonHandler>>();
         var handler = new DeletePersonHandler(repository.Object, logger.Object);
 
-        var result = await handler.Handle(new DeletePersonCommand(1), CancellationToken.None);
+        var result = await handler.Handle(new DeletePersonRequest(1), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Pessoa não encontrada.", result.Message);
@@ -123,7 +126,7 @@ public class PersonHandlerTests
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
         var handler = new DeletePersonHandler(repository.Object, NullLogger<DeletePersonHandler>.Instance);
 
-        var result = await handler.Handle(new DeletePersonCommand(1), CancellationToken.None);
+        var result = await handler.Handle(new DeletePersonRequest(1), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         repository.Verify(repo => repo.DeleteAsync(person, CancellationToken.None), Times.Once);
@@ -135,7 +138,7 @@ public class PersonHandlerTests
         var logger = new Mock<Microsoft.Extensions.Logging.ILogger<GetPersonHandler>>();
         var handler = new GetPersonHandler(repository.Object, logger.Object);
 
-        var result = await handler.Handle(new GetPersonQuery(1), CancellationToken.None);
+        var result = await handler.Handle(new GetPersonRequest(1), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal("Pessoa não encontrada.", result.Message);
@@ -150,7 +153,7 @@ public class PersonHandlerTests
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
 
         var result = await new UpdatePersonHandler(repository.Object, new PersonValidator(), NullLogger<UpdatePersonHandler>.Instance)
-            .Handle(new UpdatePersonCommand(1, CreateRequest()), CancellationToken.None);
+            .Handle(CreateUpdateRequest(1), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(AutoSales.Application.Results.ErrorType.Validation, result.ErrorType);
@@ -162,7 +165,7 @@ public class PersonHandlerTests
     public async Task UpdateAsync_MissingPerson_ReturnsNotFound()
     {
         var result = await new UpdatePersonHandler(repository.Object, new PersonValidator(), NullLogger<UpdatePersonHandler>.Instance)
-            .Handle(new UpdatePersonCommand(1, CreateRequest()), CancellationToken.None);
+            .Handle(CreateUpdateRequest(1), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(AutoSales.Application.Results.ErrorType.NotFound, result.ErrorType);
@@ -176,7 +179,7 @@ public class PersonHandlerTests
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
 
         var result = await new UpdatePersonHandler(repository.Object, new PersonValidator(), NullLogger<UpdatePersonHandler>.Instance)
-            .Handle(new UpdatePersonCommand(1, CreateRequest()), CancellationToken.None);
+            .Handle(CreateUpdateRequest(1), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal("12345678909", person.Cpf);

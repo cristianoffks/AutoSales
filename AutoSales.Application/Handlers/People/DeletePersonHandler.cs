@@ -6,7 +6,7 @@ using AutoSales.Application.Repositories;
 
 namespace AutoSales.Application.Handlers.People;
 
-public sealed class DeletePersonHandler : IRequestHandler<DeletePersonCommand, Result<bool>>
+public sealed class DeletePersonHandler : IRequestHandler<DeletePersonRequest, Result<bool>>
 {
     private readonly IPersonRepository _repository;
     private readonly ILogger<DeletePersonHandler> _logger;
@@ -19,7 +19,7 @@ public sealed class DeletePersonHandler : IRequestHandler<DeletePersonCommand, R
         _logger = logger;
     }
 
-    public async Task<Result<bool>> Handle(DeletePersonCommand message, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(DeletePersonRequest message, CancellationToken cancellationToken)
     {
         try
         {

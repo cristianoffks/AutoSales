@@ -37,9 +37,9 @@ public sealed class PeopleController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Person>> Get(int id, CancellationToken cancellationToken)
+    public async Task<ActionResult<Person>> Get([FromRoute] GetPersonRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetPersonQuery(id), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -49,9 +49,9 @@ public sealed class PeopleController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Person>> Create(PersonRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<Person>> Create(CreatePersonRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new CreatePersonCommand(request), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -61,9 +61,10 @@ public sealed class PeopleController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, PersonRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(int id, UpdatePersonRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new UpdatePersonCommand(id, request), cancellationToken);
+        request.Id = id;
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -73,9 +74,9 @@ public sealed class PeopleController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] DeletePersonRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeletePersonCommand(id), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);

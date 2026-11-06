@@ -4,4 +4,4 @@ using AutoSales.Application.Results;
 
 namespace AutoSales.Application.Requests;
 
-public sealed record GetVehicleQuery(int Id) : IRequest<Result<VehicleResponse>>;
+public sealed record GetVehicleRequest(int Id) : IRequest<Result<VehicleResponse>>;

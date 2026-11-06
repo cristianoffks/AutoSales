@@ -6,7 +6,7 @@ using AutoSales.Application.Repositories;
 
 namespace AutoSales.Application.Handlers.Vehicles;
 
-public sealed class DeleteVehicleHandler : IRequestHandler<DeleteVehicleCommand, Result<bool>>
+public sealed class DeleteVehicleHandler : IRequestHandler<DeleteVehicleRequest, Result<bool>>
 {
     private readonly IVehicleRepository _repository;
     private readonly ILogger<DeleteVehicleHandler> _logger;
@@ -19,7 +19,7 @@ public sealed class DeleteVehicleHandler : IRequestHandler<DeleteVehicleCommand,
         _logger = logger;
     }
 
-    public async Task<Result<bool>> Handle(DeleteVehicleCommand message, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(DeleteVehicleRequest message, CancellationToken cancellationToken)
     {
         try
         {

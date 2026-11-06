@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AutoSales.Application.Validators;
 
-public sealed class PersonValidator : AbstractValidator<PersonRequest>
+public sealed class PersonValidator : AbstractValidator<CreatePersonRequest>
 {
     public PersonValidator()
     {

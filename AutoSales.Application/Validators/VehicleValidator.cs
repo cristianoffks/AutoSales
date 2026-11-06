@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AutoSales.Application.Validators;
 
-public sealed class VehicleValidator : AbstractValidator<VehicleRequest>
+public sealed class VehicleValidator : AbstractValidator<CreateVehicleRequest>
 {
     public VehicleValidator()
     {

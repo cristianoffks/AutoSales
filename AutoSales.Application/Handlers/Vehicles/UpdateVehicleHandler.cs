@@ -8,15 +8,15 @@ using FluentValidation;
 
 namespace AutoSales.Application.Handlers.Vehicles;
 
-public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleCommand, Result<bool>>
+public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleRequest, Result<bool>>
 {
     private readonly IVehicleRepository _repository;
-    private readonly IValidator<VehicleRequest> _validator;
+    private readonly IValidator<CreateVehicleRequest> _validator;
     private readonly ILogger<UpdateVehicleHandler> _logger;
 
     public UpdateVehicleHandler(
         IVehicleRepository repository,
-        IValidator<VehicleRequest> validator,
+        IValidator<CreateVehicleRequest> validator,
         ILogger<UpdateVehicleHandler> logger)
     {
         _repository = repository;
@@ -24,12 +24,11 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleCommand,
         _logger = logger;
     }
 
-    public async Task<Result<bool>> Handle(UpdateVehicleCommand message, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(UpdateVehicleRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var request = message.Data;
-            var id = message.Id;
+            var id = request.Id;
             var entity = await _repository.FindAsync(id, cancellationToken);
             if (entity == null)
             {
@@ -37,7 +36,7 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleCommand,
                 return Result<bool>.Failure("Veículo não encontrado.", errorType: ErrorType.NotFound);
             }
 
-            await _validator.ValidateAndThrowAsync(new VehicleRequest(request.Plate, request.ManufactureYear,
+            await _validator.ValidateAndThrowAsync(new CreateVehicleRequest(request.Plate, request.ManufactureYear,
                 request.Brand, request.Model, entity.PersonId), cancellationToken);
 
             if (await _repository.ExistsByPlateAsync(request.Plate.NormalizePlate(), id, cancellationToken))

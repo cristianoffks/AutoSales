@@ -8,15 +8,15 @@ using FluentValidation;
 
 namespace AutoSales.Application.Handlers.People;
 
-public sealed class UpdatePersonHandler : IRequestHandler<UpdatePersonCommand, Result<bool>>
+public sealed class UpdatePersonHandler : IRequestHandler<UpdatePersonRequest, Result<bool>>
 {
     private readonly IPersonRepository _repository;
-    private readonly IValidator<PersonRequest> _validator;
+    private readonly IValidator<CreatePersonRequest> _validator;
     private readonly ILogger<UpdatePersonHandler> _logger;
 
     public UpdatePersonHandler(
         IPersonRepository repository,
-        IValidator<PersonRequest> validator,
+        IValidator<CreatePersonRequest> validator,
         ILogger<UpdatePersonHandler> logger)
     {
         _repository = repository;
@@ -24,13 +24,13 @@ public sealed class UpdatePersonHandler : IRequestHandler<UpdatePersonCommand, R
         _logger = logger;
     }
 
-    public async Task<Result<bool>> Handle(UpdatePersonCommand message, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(UpdatePersonRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var request = message.Data;
-            var id = message.Id;
-            await _validator.ValidateAndThrowAsync(request, cancellationToken);
+            var id = request.Id;
+            await _validator.ValidateAndThrowAsync(new CreatePersonRequest(request.FullName, request.Cpf,
+                request.BirthDate, request.Email, request.Phone), cancellationToken);
             var entity = await _repository.FindAsync(id, cancellationToken);
 
             if (entity == null)

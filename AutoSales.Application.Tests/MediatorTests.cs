@@ -12,7 +12,7 @@ namespace AutoSales.Application.Tests;
 public class MediatorTests
 {
     [Fact]
-    public async Task Send_GetPersonQuery_CallsGetPersonHandler()
+    public async Task Send_GetPersonRequest_CallsGetPersonHandler()
     {
         var person = new Person
         {
@@ -22,13 +22,13 @@ public class MediatorTests
         var repository = new Mock<IPersonRepository>();
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
         var provider = new Mock<IServiceProvider>();
-        provider.Setup(service => service.GetService(typeof(IRequestHandler<GetPersonQuery, Result<Person>>)))
+        provider.Setup(service => service.GetService(typeof(IRequestHandler<GetPersonRequest, Result<Person>>)))
             .Returns(new GetPersonHandler(repository.Object, NullLogger<GetPersonHandler>.Instance));
-        provider.Setup(service => service.GetService(typeof(IEnumerable<IPipelineBehavior<GetPersonQuery, Result<Person>>>)))
-            .Returns(Array.Empty<IPipelineBehavior<GetPersonQuery, Result<Person>>>());
+        provider.Setup(service => service.GetService(typeof(IEnumerable<IPipelineBehavior<GetPersonRequest, Result<Person>>>)))
+            .Returns(Array.Empty<IPipelineBehavior<GetPersonRequest, Result<Person>>>());
         var mediator = new Mediator(provider.Object);
 
-        var result = await mediator.Send(new GetPersonQuery(1), CancellationToken.None);
+        var result = await mediator.Send(new GetPersonRequest(1), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Same(person, result.Value);

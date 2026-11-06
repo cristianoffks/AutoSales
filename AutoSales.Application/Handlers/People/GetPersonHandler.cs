@@ -7,7 +7,7 @@ using AutoSales.Application.Repositories;
 
 namespace AutoSales.Application.Handlers.People;
 
-public sealed class GetPersonHandler : IRequestHandler<GetPersonQuery, Result<Person>>
+public sealed class GetPersonHandler : IRequestHandler<GetPersonRequest, Result<Person>>
 {
     private readonly IPersonRepository _repository;
     private readonly ILogger<GetPersonHandler> _logger;
@@ -20,7 +20,7 @@ public sealed class GetPersonHandler : IRequestHandler<GetPersonQuery, Result<Pe
         _logger = logger;
     }
 
-    public async Task<Result<Person>> Handle(GetPersonQuery message, CancellationToken cancellationToken)
+    public async Task<Result<Person>> Handle(GetPersonRequest message, CancellationToken cancellationToken)
     {
         try
         {

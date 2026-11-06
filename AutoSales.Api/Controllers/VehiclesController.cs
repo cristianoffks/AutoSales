@@ -32,9 +32,9 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<VehicleResponse>> Get(int id, CancellationToken cancellationToken)
+    public async Task<ActionResult<VehicleResponse>> Get([FromRoute] GetVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetVehicleQuery(id), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -44,9 +44,9 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<VehicleResponse>> Create(VehicleRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<VehicleResponse>> Create(CreateVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new CreateVehicleCommand(request), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -58,7 +58,8 @@ public sealed class VehiclesController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new UpdateVehicleCommand(id, request), cancellationToken);
+        request.Id = id;
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -68,9 +69,9 @@ public sealed class VehiclesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] DeleteVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeleteVehicleCommand(id), cancellationToken);
+        var result = await _mediator.Send(request, cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
