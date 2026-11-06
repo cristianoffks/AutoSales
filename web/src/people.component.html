@@ -1,0 +1,56 @@
+<main>
+  <header>
+    <span>AutoSales</span>
+    <h1>Pessoas</h1>
+  </header>
+
+  <form (ngSubmit)="search()">
+    <label>
+      Nome
+      <input name="name" [(ngModel)]="name" placeholder="Digite parte do nome">
+    </label>
+    <label>
+      CPF
+      <input name="cpf" [(ngModel)]="cpf" inputmode="numeric" placeholder="Com ou sem máscara">
+    </label>
+    <button type="submit" [disabled]="loading || !hasFilters">Buscar</button>
+    <button type="button" [disabled]="loading" (click)="clear()">Limpar</button>
+  </form>
+
+  @if (loading) {
+    <p role="status">Carregando pessoas…</p>
+  } @else if (error) {
+    <p role="alert">{{ error }}</p>
+  } @else if (!searched) {
+    <p>Informe pelo menos um filtro para pesquisar.</p>
+  } @else if (people.length === 0) {
+    <p>Nenhuma pessoa encontrada.</p>
+  } @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">CPF</th>
+            <th scope="col">Nascimento</th>
+            <th scope="col">E-mail</th>
+            <th scope="col">Telefone</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (person of people; track person.id) {
+            <tr>
+              <td>{{ person.fullName }}</td>
+              <td>{{ person.cpf }}</td>
+              <td>{{ person.birthDate }}</td>
+              <td>{{ person.email }}</td>
+              <td>{{ person.phone }}</td>
+              <td><a [routerLink]="['/people', person.id, 'edit']">Editar</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>

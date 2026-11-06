@@ -1,0 +1,66 @@
+<main>
+  <h1>{{ byOwner ? 'Pesquisar veículos por proprietário' : 'Pesquisar veículos por dados do veículo' }}</h1>
+
+  <form (ngSubmit)="search()">
+    @if (byOwner) {
+      <label>
+        CPF do proprietário
+        <input name="cpf" [(ngModel)]="cpf" (ngModelChange)="resetResults()" [readOnly]="loading"
+          inputmode="numeric" maxlength="14" placeholder="Com ou sem máscara">
+      </label>
+    } @else {
+      <label>
+        Marca ou modelo
+        <input name="term" [(ngModel)]="term" placeholder="Ex.: Honda Civic">
+      </label>
+      <label>
+        Placa
+        <input name="plate" [(ngModel)]="plate" placeholder="Com ou sem hífen">
+      </label>
+    }
+    <button type="submit" [disabled]="loading || !hasFilters">Buscar</button>
+    <button type="button" [disabled]="loading" (click)="clear()">Limpar</button>
+  </form>
+
+  @if (ownerName) {
+    <p><strong>Proprietário:</strong> {{ ownerName }}</p>
+  }
+
+  @if (loading) {
+    <p role="status">Carregando veículos…</p>
+  } @else if (error) {
+    <p role="alert">{{ error }}</p>
+  } @else if (!searched) {
+    <p>Informe pelo menos um filtro para pesquisar.</p>
+  } @else if (vehicles.length === 0) {
+    <p>Nenhum veículo encontrado.</p>
+  } @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Placa</th>
+            <th scope="col">Marca</th>
+            <th scope="col">Modelo</th>
+            <th scope="col">Ano</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vehicle of vehicles; track vehicle.id) {
+            <tr>
+              <td>{{ vehicle.plate }}</td>
+              <td>{{ vehicle.brand }}</td>
+              <td>{{ vehicle.model }}</td>
+              <td>{{ vehicle.manufactureYear }}</td>
+              <td>
+                <a [routerLink]="['/vehicles', vehicle.id, 'edit']"
+                  [state]="byOwner ? { ownerCpf: cpf } : {}">Editar</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>

@@ -1,0 +1,5 @@
+<dialog #dialog class="error-dialog" aria-label="Atenção" (close)="closed.emit()">
+  <h2>Atenção</h2>
+  <p role="alert">{{ message }}</p>
+  <button type="button" (click)="dialog.close()">Fechar</button>
+</dialog>
