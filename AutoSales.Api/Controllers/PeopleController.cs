@@ -22,6 +22,7 @@ public sealed class PeopleController : ControllerBase
         [FromQuery] string? name, [FromQuery] string? cpf, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new ListPersonQuery(name, cpf), cancellationToken);
+
         if (!result.IsSuccess)
         {
             return BadRequest(new ProblemDetails
@@ -40,6 +41,7 @@ public sealed class PeopleController : ControllerBase
     public async Task<ActionResult<Person>> Get(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetPersonQuery(id), cancellationToken);
+
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -52,6 +54,7 @@ public sealed class PeopleController : ControllerBase
     public async Task<ActionResult<Person>> Create(PersonRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new CreatePersonCommand(request), cancellationToken);
+
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -64,6 +67,7 @@ public sealed class PeopleController : ControllerBase
     public async Task<IActionResult> Update(int id, PersonRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new UpdatePersonCommand(id, request), cancellationToken);
+
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
@@ -76,6 +80,7 @@ public sealed class PeopleController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeletePersonCommand(id), cancellationToken);
+
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);
