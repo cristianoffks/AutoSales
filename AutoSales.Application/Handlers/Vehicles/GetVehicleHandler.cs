@@ -32,8 +32,7 @@ public sealed class GetVehicleHandler : IRequestHandler<GetVehicleRequest, Resul
                 return Result<VehicleResponse>.Failure("Veículo não encontrado.", errorType: ErrorType.NotFound);
             }
 
-            return Result<VehicleResponse>.Success(new VehicleResponse(vehicle.Id, vehicle.Plate, vehicle.ManufactureYear,
-                vehicle.Brand, vehicle.Model, vehicle.PersonId));
+            return Result<VehicleResponse>.Success(VehicleResponse.From(vehicle));
         }
         catch (Exception exception)
         {

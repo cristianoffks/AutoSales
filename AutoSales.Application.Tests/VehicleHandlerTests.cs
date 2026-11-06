@@ -107,7 +107,7 @@ public class VehicleHandlerTests
     public async Task UpdateAsync_MissingVehicle_ReturnsNotFoundWithoutSaving()
     {
         var logger = new Mock<Microsoft.Extensions.Logging.ILogger<UpdateVehicleHandler>>();
-        var handler = new UpdateVehicleHandler(repository.Object, new VehicleValidator(), logger.Object);
+        var handler = new UpdateVehicleHandler(repository.Object, new UpdateVehicleValidator(), logger.Object);
 
         var result = await handler.Handle(new UpdateVehicleRequest("ABC1234", 2020, "Honda", "Civic") with { Id = 10 }, CancellationToken.None);
 
@@ -153,7 +153,7 @@ public class VehicleHandlerTests
         repository.Setup(repo => repo.AddAsync(It.IsAny<Vehicle>(), CancellationToken.None))
             .Callback<Vehicle, CancellationToken>((vehicle, token) => vehicle.Id = 10);
 
-        var result = await new CreateVehicleHandler(repository.Object, new VehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance).Handle(CreateRequest(), CancellationToken.None);
+        var result = await new CreateVehicleHandler(repository.Object, new CreateVehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance).Handle(CreateRequest(), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         var vehicle = Assert.IsType<AutoSales.Application.Responses.VehicleResponse>(result.Value);
@@ -170,7 +170,7 @@ public class VehicleHandlerTests
         var request = CreateRequest() with { Plate = "123" };
 
         var exception = await Assert.ThrowsAsync<ValidationException>(() =>
-            new CreateVehicleHandler(repository.Object, new VehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance).Handle(request, CancellationToken.None));
+            new CreateVehicleHandler(repository.Object, new CreateVehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance).Handle(request, CancellationToken.None));
 
         Assert.Contains(exception.Errors, error => error.PropertyName == "Plate");
         repository.Verify(repo => repo.AddAsync(It.IsAny<Vehicle>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -182,7 +182,7 @@ public class VehicleHandlerTests
         var request = CreateRequest() with { PersonId = 2 };
 
         var logger = new Mock<Microsoft.Extensions.Logging.ILogger<CreateVehicleHandler>>();
-        var result = await new CreateVehicleHandler(repository.Object, new VehicleValidator(), people.Object, logger.Object)
+        var result = await new CreateVehicleHandler(repository.Object, new CreateVehicleValidator(), people.Object, logger.Object)
             .Handle(request, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
@@ -198,7 +198,7 @@ public class VehicleHandlerTests
     {
         repository.Setup(repo => repo.ExistsByPlateAsync("ABC1234", null, CancellationToken.None)).ReturnsAsync(true);
 
-        var result = await new CreateVehicleHandler(repository.Object, new VehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance)
+        var result = await new CreateVehicleHandler(repository.Object, new CreateVehicleValidator(), people.Object, NullLogger<CreateVehicleHandler>.Instance)
             .Handle(CreateRequest(), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
@@ -213,7 +213,7 @@ public class VehicleHandlerTests
             .ReturnsAsync(new Vehicle { Id = 10, Plate = "ABC1234", PersonId = 1 });
         repository.Setup(repo => repo.ExistsByPlateAsync("DEF5678", 10, CancellationToken.None)).ReturnsAsync(true);
 
-        var result = await new UpdateVehicleHandler(repository.Object, new VehicleValidator(), NullLogger<UpdateVehicleHandler>.Instance)
+        var result = await new UpdateVehicleHandler(repository.Object, new UpdateVehicleValidator(), NullLogger<UpdateVehicleHandler>.Instance)
             .Handle(new UpdateVehicleRequest("DEF5678", 2021, "Honda", "Civic") with { Id = 10 },
                 CancellationToken.None);
 
@@ -229,7 +229,7 @@ public class VehicleHandlerTests
         repository.Setup(repo => repo.FindAsync(10, CancellationToken.None)).ReturnsAsync(vehicle);
         var request = new UpdateVehicleRequest("DEF5678", 2021, "Honda", "Civic");
 
-        var result = await new UpdateVehicleHandler(repository.Object, new VehicleValidator(), NullLogger<UpdateVehicleHandler>.Instance)
+        var result = await new UpdateVehicleHandler(repository.Object, new UpdateVehicleValidator(), NullLogger<UpdateVehicleHandler>.Instance)
             .Handle(request with { Id = 10 }, CancellationToken.None);
 
         Assert.True(result.IsSuccess);

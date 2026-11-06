@@ -56,18 +56,12 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleRequest,
             };
 
             await _repository.AddAsync(entity, cancellationToken);
-            return Result<VehicleResponse>.Success(ToResponse(entity));
+            return Result<VehicleResponse>.Success(VehicleResponse.From(entity));
         }
         catch (Exception exception)
         {
             _logger.LogError(exception, "Erro ao executar {Handler}", nameof(CreateVehicleHandler));
             throw;
         }
-    }
-
-    private static VehicleResponse ToResponse(Vehicle vehicle)
-    {
-        return new VehicleResponse(vehicle.Id, vehicle.Plate, vehicle.ManufactureYear,
-            vehicle.Brand, vehicle.Model, vehicle.PersonId);
     }
 }

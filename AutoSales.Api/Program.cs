@@ -65,7 +65,7 @@ builder.Services.AddMediatR(configuration =>
     configuration.RegisterServicesFromAssemblyContaining<CreatePersonHandler>();
 });
 builder.Services.AddScoped<IValidator<CreatePersonRequest>, PersonValidator>();
-builder.Services.AddScoped<IValidator<CreateVehicleRequest>, VehicleValidator>();
+builder.Services.AddScoped<IValidator<CreateVehicleRequest>, CreateVehicleValidator>();
 
 var app = builder.Build();
 

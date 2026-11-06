@@ -31,9 +31,9 @@ public sealed class ListVehicleHandler : IRequestHandler<ListVehicleQuery, Resul
             var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
             var normalizedPlate = string.IsNullOrWhiteSpace(plate) ? null : plate.Trim().NormalizePlate();
             var vehicles = await _repository.ListAsync(normalizedSearch, normalizedPlate, personId, cancellationToken);
-            var result = vehicles.Select(vehicle => new VehicleResponse(
-                vehicle.Id, vehicle.Plate, vehicle.ManufactureYear,
-                vehicle.Brand, vehicle.Model, vehicle.PersonId)).ToList();
+
+            var result = vehicles.Select(VehicleResponse.From).ToList();
+
             return Result<IReadOnlyList<VehicleResponse>>.Success(result);
         }
         catch (Exception exception)

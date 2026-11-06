@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace AutoSales.Application.Validators;
 
-public sealed class VehicleValidator : AbstractValidator<CreateVehicleRequest>
+public sealed class CreateVehicleValidator : AbstractValidator<CreateVehicleRequest>
 {
-    public VehicleValidator()
+    public CreateVehicleValidator()
     {
         RuleFor(request => request.Plate).Cascade(CascadeMode.Stop).NotEmpty()
             .Matches(@"\A[A-Za-z]{3}-?(?:[0-9]{4}|[0-9][A-Za-z][0-9]{2})\z")

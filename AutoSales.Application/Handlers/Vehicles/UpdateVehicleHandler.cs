@@ -11,12 +11,12 @@ namespace AutoSales.Application.Handlers.Vehicles;
 public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleRequest, Result<bool>>
 {
     private readonly IVehicleRepository _repository;
-    private readonly IValidator<CreateVehicleRequest> _validator;
+    private readonly IValidator<UpdateVehicleRequest> _validator;
     private readonly ILogger<UpdateVehicleHandler> _logger;
 
     public UpdateVehicleHandler(
         IVehicleRepository repository,
-        IValidator<CreateVehicleRequest> validator,
+        IValidator<UpdateVehicleRequest> validator,
         ILogger<UpdateVehicleHandler> logger)
     {
         _repository = repository;
@@ -36,8 +36,7 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleRequest,
                 return Result<bool>.Failure("Veículo não encontrado.", errorType: ErrorType.NotFound);
             }
 
-            await _validator.ValidateAndThrowAsync(new CreateVehicleRequest(request.Plate, request.ManufactureYear,
-                request.Brand, request.Model, entity.PersonId), cancellationToken);
+            await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
             if (await _repository.ExistsByPlateAsync(request.Plate.NormalizePlate(), id, cancellationToken))
             {

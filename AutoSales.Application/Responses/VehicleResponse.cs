@@ -1,3 +1,5 @@
+using AutoSales.Application.Entities;
+
 namespace AutoSales.Application.Responses;
 
 public sealed record VehicleResponse(
@@ -6,4 +8,16 @@ public sealed record VehicleResponse(
     int ManufactureYear,
     string Brand,
     string Model,
-    int PersonId);
+    int PersonId)
+{
+    public static VehicleResponse From(Vehicle vehicle)
+    {
+        return new VehicleResponse(
+            vehicle.Id,
+            vehicle.Plate,
+            vehicle.ManufactureYear,
+            vehicle.Brand,
+            vehicle.Model,
+            vehicle.PersonId);
+    }
+}
