@@ -6,7 +6,7 @@ using AutoSales.Application.Entities;
 using AutoSales.Application.Repositories;
 using AutoSales.Application.Results;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.People;
 
 public sealed class ListPersonHandler : IRequestHandler<ListPersonQuery, Result<IReadOnlyList<Person>>>
 {

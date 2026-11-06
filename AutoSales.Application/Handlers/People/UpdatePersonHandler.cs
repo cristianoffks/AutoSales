@@ -6,7 +6,7 @@ using AutoSales.Application.Requests;
 using AutoSales.Application.Repositories;
 using FluentValidation;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.People;
 
 public sealed class UpdatePersonHandler : IRequestHandler<UpdatePersonCommand, Result<bool>>
 {

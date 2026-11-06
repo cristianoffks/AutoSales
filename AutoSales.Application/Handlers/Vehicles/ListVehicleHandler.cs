@@ -6,7 +6,7 @@ using AutoSales.Application.Responses;
 using AutoSales.Application.Repositories;
 using AutoSales.Application.Results;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.Vehicles;
 
 public sealed class ListVehicleHandler : IRequestHandler<ListVehicleQuery, Result<IReadOnlyList<VehicleResponse>>>
 {

@@ -7,7 +7,7 @@ using AutoSales.Application.Entities;
 using AutoSales.Application.Repositories;
 using FluentValidation;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.People;
 
 public sealed class CreatePersonHandler : IRequestHandler<CreatePersonCommand, Result<Person>>
 {

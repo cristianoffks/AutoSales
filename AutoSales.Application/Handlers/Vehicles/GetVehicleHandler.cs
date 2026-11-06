@@ -5,7 +5,7 @@ using AutoSales.Application.Responses;
 using AutoSales.Application.Results;
 using AutoSales.Application.Repositories;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.Vehicles;
 
 public sealed class GetVehicleHandler : IRequestHandler<GetVehicleQuery, Result<VehicleResponse>>
 {

@@ -4,7 +4,7 @@ using AutoSales.Application.Requests;
 using AutoSales.Application.Results;
 using AutoSales.Application.Repositories;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.Vehicles;
 
 public sealed class DeleteVehicleHandler : IRequestHandler<DeleteVehicleCommand, Result<bool>>
 {

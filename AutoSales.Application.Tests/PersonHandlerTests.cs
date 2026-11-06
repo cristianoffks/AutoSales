@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging.Abstractions;
-using AutoSales.Application.Handlers;
 using AutoSales.Application.Requests;
 using AutoSales.Application.Validators;
 using AutoSales.Application.Exceptions;
@@ -7,6 +6,7 @@ using AutoSales.Application.Entities;
 using AutoSales.Application.Repositories;
 using FluentValidation;
 using Moq;
+using AutoSales.Application.Handlers.People;
 
 namespace AutoSales.Application.Tests;
 

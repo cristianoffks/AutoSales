@@ -1,11 +1,11 @@
 using AutoSales.Application.Results;
 using Microsoft.Extensions.Logging.Abstractions;
 using AutoSales.Application.Entities;
-using AutoSales.Application.Handlers;
 using AutoSales.Application.Repositories;
 using AutoSales.Application.Requests;
 using MediatR;
 using Moq;
+using AutoSales.Application.Handlers.People;
 
 namespace AutoSales.Application.Tests;
 

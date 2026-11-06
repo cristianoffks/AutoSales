@@ -1,5 +1,5 @@
 using AutoSales.Application.Entities;
-using AutoSales.Application.Handlers;
+using AutoSales.Application.Handlers.People;
 using AutoSales.Application.Repositories;
 using AutoSales.Application.Requests;
 using Microsoft.Extensions.Logging;

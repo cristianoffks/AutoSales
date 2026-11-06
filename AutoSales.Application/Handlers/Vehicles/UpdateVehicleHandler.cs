@@ -6,7 +6,7 @@ using AutoSales.Application.Requests;
 using AutoSales.Application.Repositories;
 using FluentValidation;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.Vehicles;
 
 public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicleCommand, Result<bool>>
 {

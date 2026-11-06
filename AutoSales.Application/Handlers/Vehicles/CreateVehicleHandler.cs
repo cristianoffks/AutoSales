@@ -8,7 +8,7 @@ using AutoSales.Application.Entities;
 using AutoSales.Application.Repositories;
 using FluentValidation;
 
-namespace AutoSales.Application.Handlers;
+namespace AutoSales.Application.Handlers.Vehicles;
 
 public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleCommand, Result<VehicleResponse>>
 {

@@ -1,5 +1,4 @@
 using AutoSales.Api.Middleware;
-using AutoSales.Application.Handlers;
 using AutoSales.Application.Requests;
 using AutoSales.Application.Validators;
 using AutoSales.Application.Repositories;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using Serilog;
+using AutoSales.Application.Handlers.People;
 
 var builder = WebApplication.CreateBuilder(args);
 
