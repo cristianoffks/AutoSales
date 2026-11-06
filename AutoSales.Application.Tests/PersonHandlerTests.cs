@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using AutoSales.Application.Requests;
 using AutoSales.Application.Validators;
-using AutoSales.Application.Exceptions;
 using AutoSales.Application.Entities;
 using AutoSales.Application.Repositories;
 using FluentValidation;
@@ -16,6 +15,16 @@ public class PersonHandlerTests
 
     private static PersonRequest CreateRequest() => new(
         " Ana Silva ", "12345678909", new DateOnly(1990, 1, 15), "ana@example.com", "11999999999");
+
+    private static Person CreatePerson(string cpf = "12345678909") => new()
+    {
+        Id = 1,
+        FullName = "Ana",
+        Cpf = cpf,
+        BirthDate = new DateOnly(1990, 1, 15),
+        Email = "ana@example.com",
+        Phone = "11999999999"
+    };
 
     [Fact]
     public async Task CreateAsync_NormalizesCpfAndName()
@@ -110,10 +119,7 @@ public class PersonHandlerTests
     [Fact]
     public async Task DeleteAsync_ExistingPerson_DeletesAndReturnsSuccess()
     {
-        var person = new Person
-        {
-            Id = 1, FullName = "Ana", Cpf = "12345678909", Email = "ana@example.com", Phone = "11999999999"
-        };
+        var person = CreatePerson();
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
         var handler = new DeletePersonHandler(repository.Object, NullLogger<DeletePersonHandler>.Instance);
 
@@ -140,10 +146,8 @@ public class PersonHandlerTests
     [Fact]
     public async Task UpdateAsync_ChangedCpf_DoesNotSave()
     {
-        repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(new Person
-        {
-            Id = 1, FullName = "Ana Silva", Cpf = "98765432100", Email = "ana@example.com", Phone = "11999999999"
-        });
+        var person = CreatePerson(cpf: "98765432100");
+        repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
 
         var result = await new UpdatePersonHandler(repository.Object, new PersonValidator(), NullLogger<UpdatePersonHandler>.Instance)
             .Handle(new UpdatePersonCommand(1, CreateRequest()), CancellationToken.None);
@@ -168,10 +172,7 @@ public class PersonHandlerTests
     [Fact]
     public async Task UpdateAsync_SameCpf_UpdatesPerson()
     {
-        var person = new Person
-        {
-            Id = 1, FullName = "Ana", Cpf = "12345678909", Email = "ana@example.com", Phone = "11999999999"
-        };
+        var person = CreatePerson();
         repository.Setup(repo => repo.FindAsync(1, CancellationToken.None)).ReturnsAsync(person);
 
         var result = await new UpdatePersonHandler(repository.Object, new PersonValidator(), NullLogger<UpdatePersonHandler>.Instance)
@@ -185,7 +186,7 @@ public class PersonHandlerTests
     [Fact]
     public async Task ListAsync_NoFilters_ReturnsAllPeople()
     {
-        var people = new[] { new Person { Id = 1, FullName = "Ana", Cpf = "12345678909", Email = "ana@example.com", Phone = "11999999999" } };
+        var people = new[] { CreatePerson() };
         repository.Setup(repo => repo.ListAsync(null, null, CancellationToken.None)).ReturnsAsync(people);
         var handler = new ListPersonHandler(repository.Object, NullLogger<ListPersonHandler>.Instance);
 
