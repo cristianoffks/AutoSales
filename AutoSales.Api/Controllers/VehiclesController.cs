@@ -19,10 +19,10 @@ public sealed class VehiclesController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<VehicleResponse>>> List(
-        [FromQuery] string? search, [FromQuery] string? plate, [FromQuery] int? personId,
+        [FromQuery] string? brand, [FromQuery] string? model, [FromQuery] string? plate, [FromQuery] int? personId,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListVehicleQuery(search, plate, personId), cancellationToken);
+        var result = await _mediator.Send(new ListVehicleQuery(brand, model, plate, personId), cancellationToken);
         if (!result.IsSuccess)
         {
             return ErrorResponse.Create(result, Request.Path);

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Vehicle, VehicleInput } from './vehicle';
-import { forkJoin, map, of } from 'rxjs';
+import { map, of } from 'rxjs';
 import { Person } from './people.service';
 
 @Injectable({ providedIn: 'root' })
@@ -14,13 +14,16 @@ export class VehicleService {
   }
 
   listByOwners(owners: Person[], params = new HttpParams()) {
-    if (!owners.length) return of([]);
+    if (!owners.length) {
+      return of([]);
+    }
 
-    return forkJoin(owners.map(person =>
-      this.list(params.set('personId', person.id)).pipe(
-        map(vehicles => ({ person, vehicles })),
-      ),
-    ));
+    return this.list(params).pipe(
+      map(vehicles => owners.map(person => ({
+        person,
+        vehicles: vehicles.filter(vehicle => vehicle.personId === person.id),
+      }))),
+    );
   }
 
   get(id: number) {

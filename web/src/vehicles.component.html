@@ -1,15 +1,15 @@
 <main>
   <h1>Gerenciar veículos</h1>
-  <form (ngSubmit)="search()">
-    <label>Código do veículo <input name="id" [(ngModel)]="id" inputmode="numeric" [readOnly]="loading || deleting"></label>
-    <label>Placa <input name="plate" [(ngModel)]="plate" [readOnly]="loading || deleting"></label>
+  <form #searchForm="ngForm" (ngSubmit)="search()">
+    <label>Placa <input name="plate" [(ngModel)]="plate" maxlength="7" [readOnly]="loading || deleting"></label>
     <label>Marca <input name="brand" [(ngModel)]="brand" [readOnly]="loading || deleting"></label>
     <label>Modelo <input name="model" [(ngModel)]="model" [readOnly]="loading || deleting"></label>
-    <label>Ano de fabricação <input name="year" [(ngModel)]="year" inputmode="numeric" [readOnly]="loading || deleting"></label>
+    <label>Ano de fabricação <input name="year" #yearField="ngModel" [ngModel]="year"
+      (ngModelChange)="updateYear($event, yearField)" inputmode="numeric" maxlength="4" pattern="[0-9]{4}"
+      [readOnly]="loading || deleting"></label>
     <label>Nome do proprietário <input name="name" [(ngModel)]="name" [readOnly]="loading || deleting"></label>
     <label>CPF do proprietário <input name="cpf" [(ngModel)]="cpf" [readOnly]="loading || deleting"></label>
-    <label>Código do proprietário <input name="personId" [(ngModel)]="personId" inputmode="numeric" [readOnly]="loading || deleting"></label>
-    <button type="submit" [disabled]="loading || deleting">Buscar</button>
+    <button type="submit" [disabled]="loading || deleting || searchForm.invalid">Buscar</button>
     <button type="button" [disabled]="loading || deleting" (click)="clear()">Limpar</button>
   </form>
   @if (error) { <p role="alert">{{ error }}</p> }
@@ -17,9 +17,9 @@
   @else if (rows.length === 0) { <p>Nenhum veículo encontrado.</p> }
   @else {
     <div class="table-container"><table>
-      <thead><tr><th scope="col">Código</th><th scope="col">Placa</th><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Ano</th><th scope="col">Proprietário</th><th scope="col">CPF</th><th scope="col">Ações</th></tr></thead>
+      <thead><tr><th scope="col">Placa</th><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Ano</th><th scope="col">Proprietário</th><th scope="col">CPF</th><th scope="col">Ações</th></tr></thead>
       <tbody>@for (row of rows; track row.vehicle.id) {
-        <tr><td>{{ row.vehicle.id }}</td><td>{{ row.vehicle.plate }}</td><td>{{ row.vehicle.brand }}</td><td>{{ row.vehicle.model }}</td><td>{{ row.vehicle.manufactureYear }}</td><td>{{ row.owner.fullName }}</td><td>{{ row.owner.cpf }}</td>
+        <tr><td>{{ row.vehicle.plate }}</td><td>{{ row.vehicle.brand }}</td><td>{{ row.vehicle.model }}</td><td>{{ row.vehicle.manufactureYear }}</td><td>{{ row.owner.fullName }}</td><td>{{ row.owner.cpf }}</td>
           <td><div class="result-actions"><a [routerLink]="['/vehicles', row.vehicle.id, 'edit']">Editar</a><button type="button" [disabled]="deleting" (click)="deleteVehicle(row.vehicle)">Excluir</button></div></td>
         </tr>
       }</tbody>

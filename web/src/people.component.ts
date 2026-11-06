@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize, switchMap } from 'rxjs';
@@ -14,7 +14,7 @@ import { readApiError } from './api-error';
   imports: [FormsModule, RouterLink, DatePipe],
   templateUrl: './people.component.html',
 })
-export class PeopleComponent implements OnInit {
+export class PeopleComponent {
   private readonly service = inject(PeopleService);
   private readonly vehicleService = inject(VehicleService);
   name = '';
@@ -23,9 +23,10 @@ export class PeopleComponent implements OnInit {
   loading = false;
   deleting = false;
   error = '';
-  ngOnInit(): void { this.search(); }
   search(): void {
-    if (this.loading || this.deleting) return;
+    if (this.loading || this.deleting) {
+      return;
+    }
     this.loading = true;
     this.error = '';
     this.service.list(this.name, this.cpf).pipe(
@@ -36,7 +37,11 @@ export class PeopleComponent implements OnInit {
       error: response => this.error = readApiError(response).message,
     });
   }
-  clear(): void { this.name = this.cpf = ''; this.search(); }
+  clear(): void {
+    this.name = this.cpf = '';
+    this.groups = [];
+    this.error = '';
+  }
   deletePerson(person: Person): void {
     if (this.deleting || !window.confirm(
       `Excluir ${person.fullName}?\n\nTodos os veículos vinculados a esta pessoa também serão excluídos. Esta ação não pode ser desfeita.`,

@@ -66,6 +66,7 @@ builder.Services.AddMediatR(configuration =>
 });
 builder.Services.AddScoped<IValidator<CreatePersonRequest>, PersonValidator>();
 builder.Services.AddScoped<IValidator<CreateVehicleRequest>, CreateVehicleValidator>();
+builder.Services.AddScoped<IValidator<UpdateVehicleRequest>, UpdateVehicleValidator>();
 
 var app = builder.Build();
 

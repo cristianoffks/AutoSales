@@ -58,7 +58,7 @@ export class VehicleFormComponent implements OnInit {
     this.loadingVehicle = true;
     this.vehicleService.get(id).subscribe({
       next: vehicle => {
-        this.plate = this.normalizePlate(vehicle.plate);
+        this.plate = vehicle.plate;
         this.manufactureYear = String(vehicle.manufactureYear);
         this.brand = vehicle.brand;
         this.model = vehicle.model;
@@ -229,18 +229,6 @@ export class VehicleFormComponent implements OnInit {
       field.control.setValue(this.manufactureYear, { emitViewToModelChange: false });
     }
     this.clearFieldError('manufactureyear');
-  }
-
-  updatePlate(value: string, field: NgModel): void {
-    this.plate = this.normalizePlate(value);
-    if (value !== this.plate) {
-      field.control.setValue(this.plate, { emitViewToModelChange: false });
-    }
-    this.clearFieldError('plate');
-  }
-
-  private normalizePlate(value: string): string {
-    return value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 7);
   }
 
   private get vehicleFieldsComplete(): boolean {

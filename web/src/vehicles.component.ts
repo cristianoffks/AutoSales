@@ -1,6 +1,6 @@
 import { HttpParams } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormsModule, NgModel } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize, map, switchMap } from 'rxjs';
 import { PeopleService, Person } from './people.service';
@@ -13,34 +13,49 @@ import { readApiError } from './api-error';
   imports: [FormsModule, RouterLink],
   templateUrl: './vehicles.component.html',
 })
-export class VehiclesComponent implements OnInit {
+export class VehiclesComponent {
   private readonly peopleService = inject(PeopleService);
   private readonly vehicleService = inject(VehicleService);
-  name = ''; cpf = ''; plate = ''; brand = ''; model = ''; year = ''; id = ''; personId = '';
+  name = ''; cpf = ''; plate = ''; brand = ''; model = ''; year = '';
   rows: { vehicle: Vehicle; owner: Person }[] = [];
   loading = false; deleting = false; error = '';
-  ngOnInit(): void { this.search(); }
+  updateYear(value: string, field: NgModel): void {
+    this.year = value.replace(/\D/g, '').slice(0, 4);
+    if (value !== this.year) {
+      field.control.setValue(this.year, { emitViewToModelChange: false });
+    }
+  }
+
   search(): void {
-    if (this.loading || this.deleting) return;
+    if (this.loading || this.deleting) {
+      return;
+    }
+    if (this.year && !/^[0-9]{4}$/.test(this.year)) {
+      this.error = 'O ano de fabricação deve ter quatro dígitos.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
-    const brand = this.brand.trim().toLocaleLowerCase();
-    const model = this.model.trim().toLocaleLowerCase();
+    const brand = this.brand.trim();
+    const model = this.model.trim();
     const year = this.year.trim();
-    const id = this.id.trim();
-    const personId = this.personId.trim();
     let params = new HttpParams();
-    if (this.plate.trim()) params = params.set('plate', this.plate.trim());
-    if (brand || model) params = params.set('search', this.brand.trim() || this.model.trim());
+    if (this.plate.trim()) {
+      params = params.set('plate', this.plate.trim());
+    }
+    if (brand) {
+      params = params.set('brand', brand);
+    }
+    if (model) {
+      params = params.set('model', model);
+    }
     this.peopleService.list(this.name, this.cpf).pipe(
       switchMap(people => {
-        const owners = people.filter(owner => !personId || owner.id === Number(personId));
-        return this.vehicleService.listByOwners(owners, params);
+        return this.vehicleService.listByOwners(people, params);
       }),
       map(groups => groups.flatMap(({ person, vehicles }) => vehicles
-        .filter(vehicle => vehicle.brand.toLocaleLowerCase().includes(brand) &&
-          vehicle.model.toLocaleLowerCase().includes(model) &&
-          (!year || vehicle.manufactureYear === Number(year)) && (!id || vehicle.id === Number(id)))
+        .filter(vehicle => !year || vehicle.manufactureYear === Number(year))
         .map(vehicle => ({ vehicle, owner: person })))),
       finalize(() => this.loading = false),
     ).subscribe({
@@ -49,8 +64,9 @@ export class VehiclesComponent implements OnInit {
     });
   }
   clear(): void {
-    this.name = this.cpf = this.plate = this.brand = this.model = this.year = this.id = this.personId = '';
-    this.search();
+    this.name = this.cpf = this.plate = this.brand = this.model = this.year = '';
+    this.rows = [];
+    this.error = '';
   }
   deleteVehicle(vehicle: Vehicle): void {
     if (this.deleting || !window.confirm(`Excluir o veículo ${vehicle.plate}?`)) return;

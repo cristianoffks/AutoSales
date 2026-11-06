@@ -29,17 +29,17 @@ public class VehicleHandlerTests
     [InlineData(null, null)]
     [InlineData("", "")]
     [InlineData(" ", " ")]
-    public async Task ListAsync_NoFilters_ReturnsAllVehicles(string? search, string? plate)
+    public async Task ListAsync_NoFilters_ReturnsAllVehicles(string? brand, string? model)
     {
         var vehicle = new Vehicle
         {
             Id = 10, Plate = "ABC1234", PersonId = 1, Brand = "Honda", Model = "Civic", ManufactureYear = 2020
         };
-        repository.Setup(repo => repo.ListAsync(null, null, null, CancellationToken.None))
+        repository.Setup(repo => repo.ListAsync(null, null, null, null, CancellationToken.None))
             .ReturnsAsync(new[] { vehicle });
         var handler = new ListVehicleHandler(repository.Object, NullLogger<ListVehicleHandler>.Instance);
 
-        var result = await handler.Handle(new ListVehicleQuery(search, plate, null), CancellationToken.None);
+        var result = await handler.Handle(new ListVehicleQuery(brand, model, null, null), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         var item = Assert.Single(result.Value!);
@@ -49,27 +49,29 @@ public class VehicleHandlerTests
         Assert.Equal(vehicle.Model, item.Model);
         Assert.Equal(vehicle.ManufactureYear, item.ManufactureYear);
         Assert.Equal(vehicle.PersonId, item.PersonId);
-        repository.Verify(repo => repo.ListAsync(null, null, null, CancellationToken.None), Times.Once);
+        repository.Verify(repo => repo.ListAsync(null, null, null, null, CancellationToken.None), Times.Once);
     }
 
     [Theory]
-    [InlineData("Honda", null, null)]
-    [InlineData(null, "ABC1234", null)]
-    [InlineData(null, null, 1)]
-    [InlineData(null, null, 0)]
-    [InlineData(null, null, -1)]
-    public async Task ListAsync_WithFilter_ReturnsSuccess(string? search, string? plate, int? personId)
+    [InlineData("Honda", null, null, null)]
+    [InlineData(null, "Civic", null, null)]
+    [InlineData(null, null, "ABC1234", null)]
+    [InlineData(null, null, null, 1)]
+    [InlineData(null, null, null, 0)]
+    [InlineData(null, null, null, -1)]
+    public async Task ListAsync_WithFilter_ReturnsSuccess(
+        string? brand, string? model, string? plate, int? personId)
     {
-        repository.Setup(repo => repo.ListAsync(search, plate, personId, CancellationToken.None))
+        repository.Setup(repo => repo.ListAsync(brand, model, plate, personId, CancellationToken.None))
             .ReturnsAsync(Array.Empty<Vehicle>());
         var handler = new ListVehicleHandler(repository.Object, NullLogger<ListVehicleHandler>.Instance);
 
-        var result = await handler.Handle(new ListVehicleQuery(search, plate, personId), CancellationToken.None);
+        var result = await handler.Handle(new ListVehicleQuery(brand, model, plate, personId), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
         Assert.Empty(result.Value);
-        repository.Verify(repo => repo.ListAsync(search, plate, personId, CancellationToken.None), Times.Once);
+        repository.Verify(repo => repo.ListAsync(brand, model, plate, personId, CancellationToken.None), Times.Once);
     }
 
     [Fact]

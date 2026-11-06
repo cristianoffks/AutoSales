@@ -25,12 +25,14 @@ public sealed class ListVehicleHandler : IRequestHandler<ListVehicleQuery, Resul
     {
         try
         {
-            var search = message.Search;
+            var brand = message.Brand;
+            var model = message.Model;
             var plate = message.Plate;
             var personId = message.PersonId;
-            var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+            var normalizedBrand = string.IsNullOrWhiteSpace(brand) ? null : brand.Trim();
+            var normalizedModel = string.IsNullOrWhiteSpace(model) ? null : model.Trim();
             var normalizedPlate = string.IsNullOrWhiteSpace(plate) ? null : plate.Trim().NormalizePlate();
-            var vehicles = await _repository.ListAsync(normalizedSearch, normalizedPlate, personId, cancellationToken);
+            var vehicles = await _repository.ListAsync(normalizedBrand, normalizedModel, normalizedPlate, personId, cancellationToken);
 
             var result = vehicles.Select(VehicleResponse.From).ToList();
 

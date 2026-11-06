@@ -13,13 +13,18 @@ public sealed class VehicleRepository(RegistryDbContext db) : IVehicleRepository
     }
 
     public async Task<IReadOnlyList<Vehicle>> ListAsync(
-        string? search, string? plate, int? personId, CancellationToken cancellationToken)
+        string? brand, string? model, string? plate, int? personId, CancellationToken cancellationToken)
     {
         var query = db.Vehicles.AsNoTracking();
 
-        if (!string.IsNullOrEmpty(search))
+        if (!string.IsNullOrEmpty(brand))
         {
-            query = query.Where(entity => (entity.Brand + " " + entity.Model).Contains(search));
+            query = query.Where(entity => entity.Brand.Contains(brand));
+        }
+
+        if (!string.IsNullOrEmpty(model))
+        {
+            query = query.Where(entity => entity.Model.Contains(model));
         }
 
         if (plate is not null)
